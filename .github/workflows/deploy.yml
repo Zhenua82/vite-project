@@ -1,17 +1,54 @@
-name: Build and Deploy to GitHub Pages
+# name: Build and Deploy to GitHub Pages
+
+# on:
+#   push:
+#     branches:
+#       - master  # или ваша основная ветка (например, main)
+
+# permissions:
+#   contents: write
+#   pages: write
+
+# jobs:
+#   build-and-deploy:
+#     name: Build and Deploy
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
+
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '19'  # или любая нужная версия
+
+#       - name: Install dependencies
+#         run: npm install
+
+#       - name: Build project
+#         run: npm run build
+
+#       - name: Deploy to GitHub Pages
+#         uses: peaceiris/actions-gh-pages@v3
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           publish_dir: dist
+#           publish_branch: gh-pages  # ветка для публикации GitHub Pages
+
+name: Build, Deploy and Create Deployment
 
 on:
   push:
     branches:
-      - master  # или ваша основная ветка (например, main)
+      - main  # или ваша основная ветка
 
 permissions:
   contents: write
-  pages: write
+  deployments: write  # нужен для создания деплойментов
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,17 +58,31 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '19'  # или любая нужная версия
+          node-version: '19'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
+      - name: Build
         run: npm run build
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages (Optional)
+        # Можно оставить, если также хотите публиковать сайт как обычно
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: dist
-          publish_branch: gh-pages  # ветка для публикации GitHub Pages
+          publish_branch: gh-pages
+
+      - name: Create Deployment
+        uses: octokit/request-action@v2
+        with:
+          route: POST /repos/${{ github.repository }}/deployments
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          ref: ${{ github.ref }}
+          environment: production
+          description: 'Automatic deployment of Vite site'
+          payload: '{"state": "success"}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
