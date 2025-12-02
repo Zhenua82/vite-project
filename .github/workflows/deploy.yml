@@ -36,7 +36,7 @@
 #           publish_dir: dist
 #           publish_branch: gh-pages  # ветка для публикации GitHub Pages
 
-name: Build, Deploy and Create Deployment
+name: Build and Deploy to GitHub Pages
 
 on:
   push:
