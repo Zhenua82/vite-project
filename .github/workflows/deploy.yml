@@ -41,7 +41,7 @@ name: Build and Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # или ваша основная ветка
+      - master 
 
 permissions:
   contents: write
