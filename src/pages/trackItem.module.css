@@ -1,0 +1,12 @@
+.osnovnajaRamka{
+    border: 2px solid green;
+    margin-bottom: 10px;
+}
+/* .osnovnajaRamka.activeRamka{
+    border: 2px solid rgb(228, 243, 17);
+    margin-bottom: 10px;
+} */
+.activeRamka{
+    border: 2px solid rgb(228, 243, 17);
+    margin-bottom: 10px;
+}
