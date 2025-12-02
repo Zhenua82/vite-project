@@ -75,7 +75,7 @@ jobs:
           publish_branch: gh-pages
 
       - name: Create Deployment
-        uses: octokit/request-action@v2
+        uses: octokit/request-action@v4
         with:
           route: POST /repos/${{ github.repository }}/deployments
           owner: ${{ github.repository_owner }}
