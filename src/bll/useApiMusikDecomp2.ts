@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FetchOneTrack } from "../API/api";
 import type { ApiMusikDecomp2Props } from "../pages/ApiMusikDecomp2";
 
@@ -27,32 +27,56 @@ function useApiMusikDecomp2(props: ApiMusikDecomp2Props){
     //                   then((resp)=>{setActiveTrack(resp.data); setLoadingTrack(false)});
     //     }, [ramka]);
 
-    //Вызов функции запроса данных на сервер FetchOneTrack() с signal (для отмены самого запроса в случае ненадобности!)
+    //Вызов функции запроса данных на сервер FetchOneTrack() с signal (для отмены самого запроса в случае ненадобности! работает в локалке, но не всегда в продакшене):
+    // useEffect(() => {
+    //   if (ramka === null) {
+    //     return;
+    //   }
+    //   const controller = new AbortController();
+    //   const signal = controller.signal;
+    //   setLoadingTrack(true);
+    //   FetchOneTrack(ramka, signal)
+    //     .then((resp) => {
+    //       setActiveTrack(resp.data);
+    //       setLoadingTrack(false);
+    //     })
+    //     .catch((error) => {
+    //       if (error.name === 'AbortError') {
+    //         // Запрос был отменен, ничего не делаем
+    //       } else {
+    //         // Обработка ошибок
+    //         console.error(error);
+    //         setLoadingTrack(false);
+    //       }
+    //     });
+    //   // Очистка при смене ramka или размонтировании компонента
+    //   return () => {
+    //     controller.abort();
+    //   };
+    // }, [ramka]);
+  //Для продакшена:
+    const requestIdRef = useRef(0);
     useEffect(() => {
-      if (ramka === null) {
-        return;
-      }
+      if (ramka === null) return;
+
+      const id = ++requestIdRef.current;   // Увеличиваем id запроса
       const controller = new AbortController();
-      const signal = controller.signal;
       setLoadingTrack(true);
-      FetchOneTrack(ramka, signal)
+
+      FetchOneTrack(ramka, controller.signal)
         .then((resp) => {
+          // ❗ если это старый запрос — игнорируем
+          if (id !== requestIdRef.current) return;
           setActiveTrack(resp.data);
           setLoadingTrack(false);
         })
         .catch((error) => {
-          if (error.name === 'AbortError') {
-            // Запрос был отменен, ничего не делаем
-          } else {
-            // Обработка ошибок
+          if (error.name !== "AbortError") {
             console.error(error);
             setLoadingTrack(false);
           }
         });
-      // Очистка при смене ramka или размонтировании компонента
-      return () => {
-        controller.abort();
-      };
+      return () => controller.abort();
     }, [ramka]);
 
   return {ramka, loadingTrack, activeTrack}
